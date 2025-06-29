@@ -29,3 +29,23 @@ resource "aws_subnet" "private_subnets" {
     Type = "private_subnets"
   })
 }
+
+resource "aws_internet_gateway" "gw" {
+  vpc_id = aws_vpc.main.id
+
+  tags = var.default_tags
+}
+
+resource "aws_route_table" "example" {
+  vpc_id = aws_vpc.main.id
+
+  tags = var.default_tags
+}
+
+resource "aws_route" "r" {
+  for_each = local.public_subnet_map
+
+  route_table_id            = aws_route_table.example.id
+  destination_cidr_block    = each.value
+  gateway_id = aws_internet_gateway.gw.id
+}

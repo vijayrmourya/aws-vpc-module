@@ -7,20 +7,6 @@ run_command(){
     fi
 }
 
-
-cred_file="/home/bloodborne/Artificial_volume/opt/Portfolio/AWS/aws_creds.json"
-
-eval "$(
-    jq -r 'to_entries
-        | map("\(.key)=\(.value|@sh)") 
-        | .[]' $cred_file
-)"
-
-export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-
-aws sts get-caller-identity
-
 tf_apply(){
     run_command "terraform plan -out=tfplan -var-file=default.tfvars"
     read -p "Do you want to apply the plan[yes/NO]" CHOICE
@@ -38,6 +24,19 @@ tf_destroy(){
     fi
     run_command "terraform apply --auto-approve -input=false -compact-warnings tfplan.destroy"
 }
+
+cred_file="/home/bloodborne/Artificial_volume/opt/Portfolio/AWS/aws_creds.json"
+
+eval "$(
+    jq -r 'to_entries
+        | map("\(.key)=\(.value|@sh)") 
+        | .[]' $cred_file
+)"
+
+export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+
+aws sts get-caller-identity
 
 run_command "terraform init"
 run_command "terraform fmt -recursive"
